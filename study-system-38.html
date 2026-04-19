@@ -157,7 +157,7 @@
     <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
     <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
     <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
-    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜AIと復習</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
   </div>
 </div>
 
@@ -429,47 +429,55 @@
         <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
       </div>
 
-      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜AIと復習へ →</button>
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
     </div>
   </div>
 
   <!-- STEP 4 -->
   <div class="step-section" id="step3">
     <div class="card">
-      <div class="card-title"><span>🤖</span> Step 4｜AIと復習</div>
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
       <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
         <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
         <div style="font-size:20px; font-weight:900; color:#222;">努力重視で成長促す</div>
       </div>
       <div class="step-intro">
-        <strong>AIに質問して復習しよう！</strong>
-        わからなかった単語・イディオム・文法について何でも質問できます。日本語でも英語でもOK。
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
       </div>
-      <div class="ai-chat-area">
-        <div class="ai-messages" id="aiMessages">
-          <div class="ai-msg">
-            <div class="avatar">AI</div>
-            <div class="bubble">
-              こんにちは！Unit 38「Praising Effort or Ability?」について、何でも質問してください😊<br><br>
-              例えば：<br>
-              ・「make + O + 原形の使い方を教えて」<br>
-              ・「fixed mindset と growth mindset の違いは？」<br>
-              ・「no matter what の例文を作って」
-            </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">16</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
           </div>
         </div>
-        <div class="ai-input-row">
-          <textarea class="ai-input" id="aiInput" placeholder="質問を入力してください..." rows="2" onkeydown="handleEnter(event)"></textarea>
-          <button class="ai-send" id="aiSendBtn" onclick="sendMessage()">➤</button>
-        </div>
       </div>
-      <div style="margin-top:20px;">
-        <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
       </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
     </div>
     <div class="completion-banner" id="completionBanner" style="display:none;">
       <h2>🎉 Unit 38 完了！</h2>
-      <p>お疲れ様でした。褒め方と成長マインドセットについて学習しました。<br>次のユニットへ進みましょう！</p>
+      <p>お疲れ様でした。褒めるべきは努力か、能力かについて学習しました。<br>次のユニットへ進みましょう！</p>
     </div>
   </div>
 
@@ -546,70 +554,34 @@
     result.scrollIntoView({ behavior: 'smooth' });
   }
 
-  const SYSTEM_PROMPT = `あなたは英語学習のサポーターです。
-現在学習中の教材は「Unit 38: Praising Effort or Ability?（褒めるべきは努力か、能力か）」です。
-
-本文（英語）:
-①How do you feel when a teacher or parent praises you for working hard on a task that you had difficulty doing? Do you feel like working harder? And how do you feel if they criticize you and find fault with your work? Does it make you want to give up trying?
-②Carol Dweck, a psychologist at Stanford University, has studied effort and success. She found that when it comes to ability, people generally have two kinds of mindset. One is a fixed mindset, which says people are born with natural talents, regardless of effort. The other is a growth mindset, which says people can get over any difficulty through effort and practice.
-③Dweck is just one of many researchers who have looked at the effects of praising ability and effort. Another study from 1998 shows that praising ability puts children in a fixed mindset, which may make them feel that they are inferior to other children. On the contrary, praising effort gives rise to a growth mindset in children, by telling them they developed new skills because they made an effort to do the task.
-④Experts say that teachers and parents should make a point of praising the process each time the child works hard, no matter what the outcome may be. Adults should also be sure to give praise honestly. Children can tell if praise is not sincere, and if they hear it the wrong way, it will be all for nothing.
-
-重要イディオム: have difficulty ~ing / find fault with / give up ~ing / when it comes to / regardless of / get over / look at / on the contrary / give rise to / make an effort / make a point of ~ing / no matter what / all for nothing
-
-以下の役割を果たしてください：
-- 学習者の質問に日本語でわかりやすく答える
-- イディオム・単語・文法の説明は例文を使って丁寧に
-- 本文の内容に関する質問にも的確に答える
-- 励ましながら学習をサポートする
-- 回答は簡潔に（200文字以内を目安に）`;
-
-  const conversationHistory = [];
-  let msgCounter = 0;
-
-  async function sendMessage() {
-    const input = document.getElementById('aiInput');
-    const text = input.value.trim();
-    if (!text) return;
-    addMessage('user', text);
-    input.value = '';
-    conversationHistory.push({ role: 'user', content: text });
-    document.getElementById('aiSendBtn').disabled = true;
-    const loadingId = addMessage('assistant', '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>');
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: conversationHistory })
-      });
-      const data = await response.json();
-      const reply = data.content?.map(c => c.text || '').join('') || 'エラーが発生しました。';
-      conversationHistory.push({ role: 'assistant', content: reply });
-      updateMessage(loadingId, reply);
-    } catch (e) { updateMessage(loadingId, 'エラーが発生しました。もう一度試してください。'); }
-    document.getElementById('aiSendBtn').disabled = false;
-  }
-
-  function addMessage(role, html) {
-    const id = 'msg-' + (++msgCounter);
-    const container = document.getElementById('aiMessages');
-    const div = document.createElement('div');
-    div.className = 'ai-msg ' + (role === 'user' ? 'user' : '');
-    div.id = id;
-    div.innerHTML = `<div class="avatar">${role === 'user' ? 'あ' : 'AI'}</div><div class="bubble">${html}</div>`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    return id;
-  }
-
-  function updateMessage(id, text) {
-    const el = document.getElementById(id);
-    if (el) { el.querySelector('.bubble').textContent = text; document.getElementById('aiMessages').scrollTop = 99999; }
-  }
-
-  function handleEnter(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'have difficulty [trouble] (in) ...ing',ja:'…するのに苦労する'},
+    {en:'find fault with ~',ja:'〜のあらを探す'},
+    {en:'give up ~',ja:'〜をあきらめる；〜をやめる'},
+    {en:'regardless of ~',ja:'〜に関係なく；〜に構わず'},
+    {en:'get over ~',ja:'〜を克服する'},
+    {en:'look at ~',ja:'〜を見る'},
+    {en:'be inferior to ~',ja:'〜より劣る'},
+    {en:'on the contrary',ja:'それどころか'},
+    {en:'give rise to ~',ja:'〜を引き起こす'},
+    {en:'make an effort [efforts] (to do)',ja:'（…しようと）努力する'},
+    {en:'make a point of ...ing',ja:'必ず…することにしている'},
+    {en:'each time ...',ja:'…するたびに'},
+    {en:'for nothing',ja:'無駄に；ただで'},
+    {en:'feel like ...ing',ja:'…したい気がする'},
+    {en:'when it comes to ~',ja:'〜のことになると'},
+    {en:'no matter what (may) ...',ja:'たとえ何が（を）…しようと'}
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
 </script>
 
 </body>
